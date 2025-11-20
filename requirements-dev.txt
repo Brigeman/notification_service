@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Development tools
+ipython==8.18.1
+django-extensions==3.2.3
