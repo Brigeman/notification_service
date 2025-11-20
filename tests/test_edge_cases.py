@@ -76,6 +76,10 @@ class EdgeCasesTest(TestCase):
 
     def test_very_long_body(self):
         """Тест: очень длинное тело сообщения."""
+        from unittest.mock import patch
+
+        from notifications.channels.base import ChannelResult
+
         long_body = "A" * 10000  # 10KB сообщение
 
         notification = Notification.objects.create(
@@ -83,7 +87,13 @@ class EdgeCasesTest(TestCase):
             body=long_body,
         )
 
-        self.service.send_notification(notification)
+        # Мокаем email канал для гарантированного успеха
+        with patch.object(
+            self.service.channel_senders["email"],
+            "send",
+            return_value=ChannelResult(success=True),
+        ):
+            self.service.send_notification(notification)
 
         notification.refresh_from_db()
         self.assertEqual(notification.body, long_body)
